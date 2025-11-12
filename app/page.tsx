@@ -9,10 +9,12 @@ export default function Home() {
     <div>
       
       {isLoggedIn? 
-      (
-        <Login setIsLoggedIn={setIsLoggedIn}/>
-      ):
-        <SpontaneousHangouts setIsLoggedIn={setIsLoggedIn} />
+        (
+          <Login setIsLoggedIn={setIsLoggedIn}/>
+        ):
+        (
+          <SpontaneousHangouts setIsLoggedIn={setIsLoggedIn} />
+        )
       }
     </div>
   );

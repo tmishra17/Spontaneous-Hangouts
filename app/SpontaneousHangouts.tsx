@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapPin, Users, Plus, Heart } from 'lucide-react';
 
 // TODO:
@@ -21,8 +21,6 @@ import { MapPin, Users, Plus, Heart } from 'lucide-react';
 // - allow them to leave a hangout
 export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (value: boolean) => void}) {
   const [view, setView] = useState('browse'); // 'browse' or 'create'
-
-
   const [hangouts, setHangouts] = useState([
     {
       id: 1,
@@ -55,6 +53,12 @@ export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (va
       description: 'Working on coding projects, come join!'
     }
   ]);
+  useEffect(()=> {
+    fetch("http://127.0.0.1:8000/hangouts")
+    .then(res => res.json())
+    .then(data=> setHangouts(data))
+  }, [])
+
  
   const [newHangout, setNewHangout] = useState({
     activity: '',
@@ -66,17 +70,23 @@ export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (va
   });
   const minutes = ["0","15", "30", "45"];
   
-  const handleCreateHangout = () => {
+  const handleCreateHangout = async() => {
     if (!newHangout.activity || !newHangout.location || 
       newHangout.minute === "0" && newHangout.hour === "0") {
       return;
     }
-    const hangout = {
-      id: hangouts.length + 1,
-      ...newHangout,
-      attendees: 1
-    };
-    setHangouts([hangout, ...hangouts]);
+    
+    const  response = await fetch("http://127.0.0.1:8000/hangouts", {
+      method: 'POST',
+      headers: {'Content-Type': "application/json"},
+      body: JSON.stringify(newHangout)
+    });
+
+    response.json().then(createdHangout => {
+      setHangouts([createdHangout, ...hangouts]);
+
+    })
+    
     setNewHangout({
       activity: '',
       location: '',
@@ -87,21 +97,39 @@ export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (va
     });
     setView('browse');
   };
+  const handleDelete = async (id: number) => {
+    await fetch(`http://127.0.0.1:8000/hangouts/${id}`, {
+      method: 'DELETE'
+    });
+    
+    // Remove from local state
+      setHangouts(hangouts.filter(h => h.id !== id));
+    };
+    const handleJoin = async (id: number) => {
+      // Get current hangout
+    if (hangouts.length === 0) return
+    const hangout = hangouts.find(h => h.id === id);
+    if (hangout.attendees >= hangout.maxAttendees) {
+      return; // Already full
+    }
+  // Update on backend
+  await fetch(`http://127.0.0.1:8000/hangouts/${id}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      attendees: hangout.attendees + 1
+    })
+  });
+  
 
-  const handleJoin = (id: number) => {
     setHangouts(hangouts.map(h => 
       h.id === id && h.attendees < h.maxAttendees
         ? { ...h, attendees: h.attendees + 1 }
         : h
     ));
+    
   };
-  // const handleHourText = (hours)=> {
-  //   return {hours === 0? (
-  //     <span> hour </span>
-  //   ):(
-  //     <span> hours </span>
-  //   )}
-// }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       {/* Header */}
@@ -110,7 +138,7 @@ export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (va
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Heart className="w-8 h-8 text-purple-600" />
-              <h1 className="text-2xl font-bold text-white-800">Spontaneous</h1>
+              <h1 className="text-2xl font-bold text-gray-100">Spontaneous</h1>
             </div>
             <button
               onClick={() => setView(view === 'browse' ? 'create' : 'browse')}
@@ -125,15 +153,16 @@ export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (va
                 'Back to Browse'
               )}
             </button>
-              
-            <button 
+            
+          
+            {/* <button 
             className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
             onClick={()=> setIsLoggedIn(false)}
             >
               Log Out
-            </button>
+            </button> */}
           </div>
-          <p className="text-white-600 mt-2">Find people to hang out with right now, no planning needed</p>
+          <p className="text-gray-100 mt-2">Find people to hang out with right now, no planning needed</p>
         </div>
       </div>
 
@@ -150,7 +179,7 @@ export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (va
               <div className="bg-white rounded-lg shadow-sm p-12 text-center">
                 <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-600 text-lg mb-2">No hangouts yet</p>
-                <p className="text-gray-500 text-sm">Be the first to create one!</p>
+                <p className="text-gray-500 text-sm"> Be the first to create one!</p>
               </div>
             ) : (
               hangouts.map(hangout => (
@@ -166,9 +195,9 @@ export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (va
                       In {' '}
                       {/* {hangout.minute} */}
                         {hangout.hour !== "0" && hangout.minute !== "0"? (
-                          <span>{hangout.hour} hours and {hangout.minute} mins </span>
+                          <span>{hangout.hour} hour(s) and {hangout.minute} mins </span>
                         ): hangout.hour !== "0" ? (
-                          <span>{hangout.hour} hours </span>
+                          <span>{hangout.hour} hour(s) </span>
                         ):
                           <span> {hangout.minute} mins</span>
                         }
@@ -188,6 +217,12 @@ export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (va
                     
                   <button className=" my-2 rounded-sm text-blue-700  rounded-med text-sm font-medium cursor-pointer">
                     Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(hangout.id)}
+                    className="mt-2 my-2 w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                  >
+                    Delete
                   </button>
                   <button
                     onClick={() => handleJoin(hangout.id)}
