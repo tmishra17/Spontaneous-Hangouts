@@ -19,7 +19,7 @@ import { MapPin, Users, Plus, Heart } from 'lucide-react';
 // - when they sign up, they will have to provide their name and location 
 // (maybe we can request their location from chrome)
 // - allow them to leave a hangout
-export default function SpontaneousHangouts({setIsLoggedIn}: {setIsLoggedIn: (value: boolean) => void}) {
+export default function SpontaneousHangouts() {
   const [view, setView] = useState('browse'); // 'browse' or 'create'
   const [hangouts, setHangouts] = useState([
     {
