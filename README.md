@@ -1,6 +1,9 @@
-# Spontaneous Hangouts
+# Spontaneous Hangouts - Combating Loneliness Through Spontaneous Connection
 
-A web app for creating and joining spontaneous meetups.
+## The Problem
+As a recent grad, I noticed how hard it is to make spontaneous plans. 
+Everything requires scheduling days in advance. Sometimes you just 
+want to grab coffee with someone right now and not worry about needing to schedule things far in advance.
 
 ## Features
 - Create time-sensitive hangouts
