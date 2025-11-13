@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { MapPin, Users, Plus, Heart } from 'lucide-react';
+import { MapPin, Users, Plus } from 'lucide-react';
 import icon from "./icon.svg"
 import Image from 'next/image'
 // TODO:
@@ -34,11 +34,13 @@ type Hangout = {
 export default function SpontaneousHangouts() {
   const [view, setView] = useState('browse'); // 'browse' or 'create'
   const [hangouts, setHangouts] = useState<Hangout[]>([]);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  
   useEffect(()=> {
-    fetch("${API_URL}")
+    fetch(`${API_URL}/hangouts`)
     .then(res => res.json())
     .then(data=> setHangouts(data))
-  }, [])
+  }, [API_URL])
 
  
   const [newHangout, setNewHangout] = useState({
@@ -50,7 +52,6 @@ export default function SpontaneousHangouts() {
     description: ''
   });
   const minutes = ["0","15", "30", "45"];
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   
   const handleCreateHangout = async() => {
     if (!newHangout.activity || !newHangout.location || 
@@ -79,7 +80,7 @@ export default function SpontaneousHangouts() {
     setView('browse');
   };
   const handleDelete = async (id: number) => {
-    await fetch(`${API_URL}/${id}`, {
+    await fetch(`${API_URL}/hangouts/${id}`, {
       method: 'DELETE'
     });
     
@@ -95,11 +96,11 @@ export default function SpontaneousHangouts() {
       }
       // Update on backend
       await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      attendees: hangout.attendees + 1
-    })
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                  attendees: hangout.attendees + 1
+                })
   });
   
 

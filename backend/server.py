@@ -1,7 +1,5 @@
 # from flask import Flask, jsonify
 from typing import Any
-
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
