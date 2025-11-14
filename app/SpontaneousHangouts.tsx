@@ -36,6 +36,8 @@ export default function SpontaneousHangouts() {
   const [hangouts, setHangouts] = useState<Hangout[]>([]);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   
+  console.log(API_URL)
+
   useEffect(()=> {
     fetch(`${API_URL}/hangouts`)
     .then(res => res.json())
