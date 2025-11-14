@@ -5,11 +5,9 @@ import sqlite3
 # FUTURE REFERENCE FOR ADDING SECURE ORIGINS
 FRONTEND_URLS = [
     "https://spontaneous-hangouts.vercel.app", 
-    "https://spontaneous-hangouts-9blma3pms-tmishra17s-projects.vercel.app/",
     "http://localhost:3000", # For local development
     "http://127.0.0.1:3000" # Alternative localhost
     ]
-# BACKEND_URL = "https://spontaneous-hangouts-production.up.railway.app/hangouts"
 
 app = FastAPI()
 app.add_middleware(
