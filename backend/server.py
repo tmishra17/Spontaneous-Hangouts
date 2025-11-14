@@ -40,14 +40,6 @@ CREATE TABLE IF NOT EXISTS hangouts(
 """)   
 
 con.commit()
-class Item:
-    id: str
-    activity: str
-    hour: str
-    minute: str
-    maxAttendees: int
-
-hangouts = []
 
 
 
