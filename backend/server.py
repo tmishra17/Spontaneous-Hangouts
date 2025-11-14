@@ -14,7 +14,7 @@ FRONTEND_URLS = [
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URLS], # allow from anywhere
+    allow_origins=FRONTEND_URLS, # allow from anywhere
     allow_credentials = True,
     allow_methods=["*"], # Allow all requests between two ports (can limit to only 1,2, or 3)
     allow_headers=["*"] # allow all headers, accept any header frontend sends (which meta data fields should be in request)
