@@ -21,6 +21,8 @@ import Image from 'next/image'
 // (maybe we can request their location from chrome)
 // - allow them to leave a hangout
 
+// NEXT TASK: Add edit button
+
 type Hangout = {
   id: number;
   activity: string;
@@ -30,31 +32,64 @@ type Hangout = {
   maxAttendees: number;
   location: string;
   description: string;
+  editing: boolean;
 };
+
 export default function SpontaneousHangouts() {
   const [view, setView] = useState('browse'); // 'browse' or 'create'
   const [hangouts, setHangouts] = useState<Hangout[]>([]);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  const toggleEdit = (id: number) => {
+    const hangout = hangouts.find(h => h.id === id)
+    console.log(hangout)
+    if(hangout === undefined) {
+      console.error("Undefined Hangout")
+      return
+    }
+    hangout.editing = !hangout?.editing
+  }
   
-  console.log(API_URL)
-
   useEffect(()=> {
+
     fetch(`${API_URL}/hangouts`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Error: status ${res}`)
+      }
+      return res.json()
+    })
     .then(data=> setHangouts(data))
+    .catch(error => {
+      console.log(`Error fetching hangouts due to ${error}`)
+    })
   }, [API_URL])
 
- 
   const [newHangout, setNewHangout] = useState({
     activity: '',
     location: '',
     hour: '0',
     minute: '0',
     maxAttendees: 4,
-    description: ''
+    description: '',
+    editing: false
   });
+
   const minutes = ["0","15", "30", "45"];
-  
+  const handleSaveClick  = async(id: number) => {
+    const hangout = hangouts.find(h => h.id === id)
+
+    try {
+        await fetch(`${API_URL}/hangouts/${id}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(hangout)
+      })
+
+    }
+    catch(err) {
+      console.error(`Failed to update hangout due to ${err}.`)
+    }
+  }
   const handleCreateHangout = async() => {
     if (!newHangout.activity || !newHangout.location || 
       newHangout.minute === "0" && newHangout.hour === "0") {
@@ -77,7 +112,8 @@ export default function SpontaneousHangouts() {
       hour: '0',
       minute: '0',
       maxAttendees: 4,
-      description: ''
+      description: '',
+      editing: false
     });
     setView('browse');
   };
@@ -98,13 +134,14 @@ export default function SpontaneousHangouts() {
       }
       // Update on backend
       await fetch(`${API_URL}/hangouts/${id}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                   attendees: hangout.attendees + 1
                 })
   });
-  
+
+
 
     setHangouts(hangouts.map(h => 
       h.id === id && h.attendees < h.maxAttendees
@@ -176,7 +213,7 @@ export default function SpontaneousHangouts() {
                         ): hangout.hour !== "0" ? (
                           <span>{hangout.hour} hour(s) </span>
                         ):
-                          <span> {hangout.minute} mins</span>
+                          <span>{hangout.minute} mins</span>
                         }
                     </span>
                   </div>
@@ -191,27 +228,57 @@ export default function SpontaneousHangouts() {
                       {hangout.attendees}/{hangout.maxAttendees} people
                     </div>
                   </div>
-                    
-                  <button className=" my-2 rounded-sm text-blue-700  rounded-med text-sm font-medium cursor-pointer">
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(hangout.id)}
-                    className="mt-2 my-2 w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => handleJoin(hangout.id)}
-                    disabled={hangout.attendees >= hangout.maxAttendees}
-                    className={`w-full py-2 rounded-lg font-medium transition ${
-                      hangout.attendees >= hangout.maxAttendees
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-purple-600 text-white hover:bg-purple-700'
-                    }`}
-                  >
-                    {hangout.attendees >= hangout.maxAttendees ? 'Full' : "I'm In!"}
-                  </button>
+                  {hangout.editing? (
+                    <>
+                      <input 
+                        // onChange={}
+                      />
+
+                      <button 
+                        onClick={()=>handleSaveClick(hangout.id)}
+                        className=" my-2 rounded-sm text-blue-700  rounded-med text-sm font-medium cursor-pointer"
+                        
+                      >
+                          Save
+                      </button>
+                      <button
+                        onClick={()=>toggleEdit(hangout.id)}
+                        className="mt-2 my-2 w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ): (
+                    <>
+                      <button 
+                        onClick={()=>toggleEdit(hangout.id)}
+                        className=" my-2 rounded-sm text-blue-700  rounded-med text-sm font-medium cursor-pointer"
+                      
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleJoin(hangout.id)}
+                        disabled={hangout.attendees >= hangout.maxAttendees}
+                        className={`w-full py-2 rounded-lg font-medium transition ${
+                          hangout.attendees >= hangout.maxAttendees
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-purple-600 text-white hover:bg-purple-700'
+                        }`}
+                      >
+                        {hangout.attendees >= hangout.maxAttendees ? 'Full' : "I'm In!"}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(hangout.id)}
+                        className="mt-2 my-2 w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                  </>
+                  )
+                  
+                  }
+                 
                 </div>
               ))
             )}

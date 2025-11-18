@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS hangouts(
         maxAttendees INTEGER,
         attendees INTEGER DEFAULT 1, 
         location TEXT NOT NULL, 
-        description TEXT
+        description TEXT,
+        editing BOOLEAN NOT NULL DEFAULT FALSE
     )
 """)   
 
@@ -55,15 +56,16 @@ def create_hangout(hangout: dict):
 
     cur = con.cursor()
     cur.execute("""
-            INSERT INTO hangouts (activity, hour, minute, maxAttendees, location, description)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO hangouts (activity, hour, minute, maxAttendees, location, description, editing)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             hangout['activity'],
             hangout['hour'],
             hangout['minute'],
             hangout['maxAttendees'],
             hangout['location'],
-            hangout.get('description', '')
+            hangout.get('description', ''),
+            hangout['editing']
             # no need for attendees because the default is one
         )
     )
@@ -77,8 +79,8 @@ def create_hangout(hangout: dict):
     new_hangout = dict(cur.fetchone())
     return new_hangout
 
-@app.put("/hangouts/{id}")
-def update_hangout(id: int, hangouts: dict):
+@app.patch("/hangouts/{id}")
+def update_attendees(id: int, hangouts: dict):
 
     cur = con.cursor()
     cur.execute("""
@@ -105,3 +107,27 @@ def delete_hangout(id: int):
     con.commit()
 
     return {"message": "Deleted", "id": id}
+
+# @app.put("/hangouts/{id}")
+# def update_hangout(id: int, hangout: dict):
+#     cur = con.cursor()
+#     cur.execute("""UPDATE hangouts 
+#                     SET 
+#                     (activity, 
+#                     hour, 
+#                     minute, 
+#                     maxAttendees, 
+#                     location, 
+#                     description, 
+#                     editing)
+#                     VALUE (?, ?, ?, ?, ?, ?, ?)
+#                     """,
+#                     (
+#                       hangout['activity'],
+#                       hangout['hour'],
+#                       hangout['minute'],
+#                       hangout['maxAttendees'],
+#                       hangout['location'],
+#                       hangout['description'],
+#                       hangout['editing']
+#                     ))

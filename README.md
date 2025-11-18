@@ -76,6 +76,7 @@ This project uses a **Next.js frontend (Vercel)** and a FastAPI backend (Railway
 
 | Issue/Error | Cause | Resolution |
 | :--- | :--- | :--- |
-| `No 'Access-Control-Allow-Origin' header is present...` | The FastAPI CORS middleware was not active on the Railway server. | Configurations for `allow_origins` are incorrect, make sure you have **ALL** the correct links when you are adding your frontend urls. Or make sure Railway is configured correctly (e.g. have ``)|
+| `No 'Access-Control-Allow-Origin' header is present...` | The FastAPI CORS middleware was not active on the Railway server. | Configurations for `allow_origins` are incorrect, make sure you have **ALL** the correct links when you are adding your frontend urls. Or make sure Railway is configured correctly (have `pip install -r requirements.txt` as your build command and `python -m uvicorn backend.server:app --host 0.0.0.0 --port 8080` for your deploy command)|
 | `Error: Invalid value for '--port': '$PORT' is not a valid integer.` | The `uvicorn` server was reading the literal string `$PORT` instead of the environment variable. | Fixed by manually adding the port to the build command |
 | `Error loading ASGI app. Could not import module "server"` | Python could not find the application file (`server.py`) inside the `backend` directory. | Added an `__init__.py` to the backend folder to mark it as a Python package, allowing the use of the command `backend.server:app.` |
+| `PUT `
