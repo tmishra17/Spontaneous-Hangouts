@@ -38,8 +38,8 @@ type Hangout = {
 export default function SpontaneousHangouts() {
   const [view, setView] = useState('browse'); // 'browse' or 'create'
   const [hangouts, setHangouts] = useState<Hangout[]>([]);
-  // const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3000" || "http://192.168.1.213:3000"|| "http://127.0.0.1:8000";
-  const API_URL = "http://192.168.1.213:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3000" || "http://192.168.1.213:3000"|| "http://127.0.0.1:8000";
+  // const API_URL = "http://192.168.1.213:8000";
   const toggleEdit = (id: number) => {
     const hangout = hangouts.find(h => h.id === id)
     console.log(hangout)
