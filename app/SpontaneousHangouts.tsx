@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { MapPin, Users, Plus } from 'lucide-react';
-import icon from "./icon.svg"
-import Image from 'next/image'
+import Header from './Header'
+import HangoutResults from './HangoutResults';
 // TODO:
 // - allow them to edit their hangout
 // - let them know if their hangout was successfully created
@@ -38,7 +38,8 @@ type Hangout = {
 export default function SpontaneousHangouts() {
   const [view, setView] = useState('browse'); // 'browse' or 'create'
   const [hangouts, setHangouts] = useState<Hangout[]>([]);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  // const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3000" || "http://192.168.1.213:3000"|| "http://127.0.0.1:8000";
+  const API_URL = "http://192.168.1.213:8000";
   const toggleEdit = (id: number) => {
     const hangout = hangouts.find(h => h.id === id)
     console.log(hangout)
@@ -193,10 +194,7 @@ export default function SpontaneousHangouts() {
       <div className="bg-black shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Image src={icon} alt="Heart logo" className='w-24 h-16'/>
-              <h1 className="text-2xl font-bold text-gray-100">Spontaneous</h1>
-            </div>
+            <Header />
             <button
               onClick={() => setView(view === 'browse' ? 'create' : 'browse')}
               className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
@@ -238,21 +236,20 @@ export default function SpontaneousHangouts() {
                   
                   {hangout.editing? (
                     <>
-                    <div className="flex gap-4 mb-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {hangout.location}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      {hangout.attendees}/{hangout.maxAttendees} people
-                    </div>
-                  </div>
+                      <div className="flex gap-4 mb-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {hangout.location}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          {hangout.attendees}/{hangout.maxAttendees} people
+                        </div>
+                      </div>
                       <div>
                         <input 
                           onChange={(e) => setActivity(hangout.id, e.target.value)}
                           placeholder='Change Activity'
-                          
                         />
                       </div>
                       <div>
@@ -287,14 +284,13 @@ export default function SpontaneousHangouts() {
                       <>
                         <div className="flex justify-between items-start mb-3">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                        {/* <h3 className="text-lg font-semibold text-gray-800 mb-1">
                           {hangout.activity}
-                        </h3>
-                        <p className="text-gray-600 text-sm">{hangout.description}</p>
+                        </h3> */}
+                        {/* <p className="text-gray-600 text-sm">{hangout.description}</p> */}
                       </div>
                       <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
                         In {' '}
-                        {/* {hangout.minute} */}
                           {hangout.hour !== "0" && hangout.minute !== "0"? (
                             <span>{hangout.hour} hour(s) and {hangout.minute} mins </span>
                           ): hangout.hour !== "0" ? (
@@ -305,7 +301,7 @@ export default function SpontaneousHangouts() {
                       </span>
                     </div>
 
-                  <div className="flex gap-4 mb-4 text-sm text-gray-600">
+                  {/* <div className="flex gap-4 mb-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
                       {hangout.location}
@@ -313,13 +309,12 @@ export default function SpontaneousHangouts() {
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
                       {hangout.attendees}/{hangout.maxAttendees} people
-                    </div>
-                  </div>
+                      </div>
+                      </div> */}
+                      <HangoutResults hangout={hangout} />
                         <button 
                           onClick={()=>toggleEdit(hangout.id)}
                           className=" my-2 rounded-sm text-blue-700  rounded-med text-sm font-medium cursor-pointer"
-                          
-
                           >
                           Edit
                         </button>

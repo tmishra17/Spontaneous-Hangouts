@@ -6,13 +6,17 @@ import sqlite3
 FRONTEND_URLS = [
     "https://spontaneous-hangouts.vercel.app", 
     "http://localhost:3000", # For local development
-    "http://127.0.0.1:3000" # Alternative localhost
-    ]
+    "http://127.0.0.1:3000", # Alternative localhost
+    "http://127.0.0.1:8000", # Alternative localhost
+    "http://192.168.1.213:3000", # Alternative localhost
+    "http://192.168.1.213:8000" # Alternative localhost
+]
 
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=FRONTEND_URLS, # allow from anywhere
+    allow_origins=["*"], # allow from anywhere
+    allow_origin_regex=r"^http?://192\.168\.1\.\d{1,3}:3000$",
     allow_credentials = True,
     allow_methods=["*"], # Allow all requests between two ports (can limit to only 1,2, or 3)
     allow_headers=["*"] # allow all headers, accept any header frontend sends (which meta data fields should be in request)
@@ -24,7 +28,7 @@ con = sqlite3.connect("data.db", check_same_thread=False)
 
 con.row_factory = sqlite3.Row
 
-cur = con.cursor() # setup cursor  (worker) creates initial table
+cur = con.cursor() # setup cursor (worker) creates initial table
 cur.execute("""
 CREATE TABLE IF NOT EXISTS hangouts(
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -48,7 +52,7 @@ def get_hangouts():
     cur = con.cursor() # cursor (worker) will now get the data from the SQL table
     cur.execute("SELECT * FROM hangouts") # returns list of tuples
     rows = cur.fetchall()
-    
+    print(f"Rows: {rows}")
     return [dict(row) for row in rows]
 
 @app.post('/hangouts')
